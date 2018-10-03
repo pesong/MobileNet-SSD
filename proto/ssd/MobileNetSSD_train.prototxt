@@ -27,14 +27,12 @@ layer {
     batch_size: 12
     backend: LMDB
   }
-
   annotated_data_param {
     batch_sampler {
     }
     label_map_file: "labelmap.prototxt"
   }
 }
-
 layer {
   name: "conv0"
   type: "Convolution"
@@ -2423,7 +2421,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 63
+    num_output: 27
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2533,7 +2531,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2645,7 +2643,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2757,7 +2755,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2869,7 +2867,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2981,7 +2979,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -3097,7 +3095,7 @@ layer {
     loc_loss_type: SMOOTH_L1
     conf_loss_type: SOFTMAX
     loc_weight: 1.0
-    num_classes: 21
+    num_classes: 9
     share_location: true
     match_type: PER_PREDICTION
     overlap_threshold: 0.5

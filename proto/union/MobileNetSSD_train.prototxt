@@ -1,17 +1,37 @@
 name: "MobileNet-SSD"
 layer {
   name: "data"
-  type: "Python"
+  type: "AnnotatedDataWithSeg"
   top: "data"
-  top: "label0"
   top: "label"
-  python_param {
-    module: "data_layers"
-    layer: "CityScapeSegDataLayer"
-    param_str: "{\'cityscape_dir\': \'/dl/data/cityscapes/cityscapes_ncs', \'batch_size\': 1, \'crop_size\': (320,480), \'seed\': 1337, \'split\': \'train\', \'mean\': (127.5, 127.5, 127.5)}"
-   }
-}
+  top: "label_seg"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    scale: 0.007843
+    mean_value: 127.5
+    mean_value: 127.5
+    mean_value: 127.5
+    resize_param {
+      prob: 1.0
+      resize_mode: WARP
+      height: 320
+      width: 480
+      interp_mode: LINEAR
+    }
+  }
 
+  data_param {
+    source: "lmdb/seg_trainval_lmdb/"
+    batch_size: 4
+    backend: LMDB
+  }
+
+  annotated_data_param {
+    label_map_file: "labelmap.prototxt"
+  }
+}
 
 layer {
   name: "conv0"
@@ -2401,7 +2421,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 9
+    num_output: 27
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2511,7 +2531,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 18
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2623,7 +2643,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 18
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2735,7 +2755,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 18
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2847,7 +2867,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 18
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2959,7 +2979,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 18
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -3053,8 +3073,42 @@ layer {
     axis: 2
   }
 }
-
-
+layer {
+  name: "mbox_loss"
+  type: "MultiBoxLoss"
+  bottom: "mbox_loc"
+  bottom: "mbox_conf"
+  bottom: "mbox_priorbox"
+  bottom: "label"
+  top: "mbox_loss"
+  include {
+    phase: TRAIN
+  }
+  propagate_down: true
+  propagate_down: true
+  propagate_down: false
+  propagate_down: false
+  loss_param {
+    normalization: VALID
+  }
+  multibox_loss_param {
+    loc_loss_type: SMOOTH_L1
+    conf_loss_type: SOFTMAX
+    loc_weight: 1.0
+    num_classes: 9
+    share_location: true
+    match_type: PER_PREDICTION
+    overlap_threshold: 0.5
+    use_prior_for_matching: true
+    background_label_id: 0
+    use_difficult_gt: true
+    neg_pos_ratio: 3.0
+    neg_overlap: 0.5
+    code_type: CENTER_SIZE
+    ignore_cross_boundary_bbox: false
+    mining_type: MAX_NEGATIVE
+  }
+}
 
 
 
@@ -3244,51 +3298,13 @@ layer {
   }
 }
 layer {
-  name: "loss"
+  name: "seg_loss"
   type: "SoftmaxWithLoss"
   bottom: "score"
-  bottom: "label"
-  top: "loss"
+  bottom: "label_seg"
+  top: "seg_loss"
   loss_param {
     ignore_label: 255
     normalize: false
-  }
-}
-
-
-layer {
-  name: "mbox_loss"
-  type: "MultiBoxLoss"
-  bottom: "mbox_loc"
-  bottom: "mbox_conf"
-  bottom: "mbox_priorbox"
-  bottom: "label"
-  top: "mbox_loss"
-  include {
-    phase: TRAIN
-  }
-  propagate_down: true
-  propagate_down: true
-  propagate_down: false
-  propagate_down: false
-  loss_param {
-    normalization: VALID
-  }
-  multibox_loss_param {
-    loc_loss_type: SMOOTH_L1
-    conf_loss_type: SOFTMAX
-    loc_weight: 1.0
-    num_classes: 3
-    share_location: true
-    match_type: PER_PREDICTION
-    overlap_threshold: 0.5
-    use_prior_for_matching: true
-    background_label_id: 0
-    use_difficult_gt: true
-    neg_pos_ratio: 3.0
-    neg_overlap: 0.5
-    code_type: CENTER_SIZE
-    ignore_cross_boundary_bbox: false
-    mining_type: MAX_NEGATIVE
   }
 }

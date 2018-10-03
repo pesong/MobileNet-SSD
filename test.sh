@@ -4,6 +4,6 @@ latest=$(ls -t snapshot/*.caffemodel | head -n 1)
 if test -z $latest; then
 	exit 1
 fi
-../../build/tools/caffe train -solver="solver_test.prototxt" \
+../../build/tools/caffe train -solver="proto/ssd/MobileNetSSD_test.prototxt" \
 --weights=$latest \
 -gpu 0

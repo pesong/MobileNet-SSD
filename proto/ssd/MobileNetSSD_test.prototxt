@@ -2419,7 +2419,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 63
+    num_output: 27
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2529,7 +2529,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2641,7 +2641,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2753,7 +2753,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2865,7 +2865,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2977,7 +2977,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 54
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -3080,7 +3080,7 @@ layer {
     shape {
       dim: 0
       dim: -1
-      dim: 21
+      dim: 9
     }
   }
 }
@@ -3113,7 +3113,7 @@ layer {
     phase: TEST
   }
   detection_output_param {
-    num_classes: 21
+    num_classes: 9
     share_location: true
     background_label_id: 0
     nms_param {
@@ -3135,7 +3135,7 @@ layer {
     phase: TEST
   }
   detection_evaluate_param {
-    num_classes: 21
+    num_classes: 9
     background_label_id: 0
     overlap_threshold: 0.5
     evaluate_difficult_gt: false

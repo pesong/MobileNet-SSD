@@ -3,10 +3,10 @@ import sys,os
 sys.path.append('/home/pesong/tools/ssd-caffe/python')
 import caffe  
 
-mobile_type = "ssd"
+mobile_type = "union"
 # mobile_type = "seg"
 
-iter_num = 54500
+iter_num = 128
 
 train_proto = 'proto/{}/MobileNetSSD_train.prototxt'.format(mobile_type)
 

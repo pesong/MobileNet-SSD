@@ -4,7 +4,7 @@ import cv2
 sys.path.append('/home/pesong/tools/ssd-caffe/python')
 import caffe  
 
-mobile_type = "ssd"
+mobile_type = "union"
 
 net_file= 'proto/{}/MobileNetSSD_deploy.prototxt'.format(mobile_type)
 caffe_model='proto/{}/MobileNetSSD_deploy.caffemodel'.format(mobile_type)
@@ -17,11 +17,8 @@ if not os.path.exists(caffe_model):
 net = caffe.Net(net_file, caffe_model, caffe.TEST)
 
 CLASSES = ('background',
-           'aeroplane', 'bicycle', 'bird', 'boat',
-           'bottle', 'bus', 'car', 'cat', 'chair',
-           'cow', 'diningtable', 'dog', 'horse',
-           'motorbike', 'person', 'pottedplant',
-           'sheep', 'sofa', 'train', 'tvmonitor')
+           'person', 'bicycle', 'car', 'road',
+           'rider', 'bus', 'motorcycle', 'truck')
 #
 # CLASSES = ('background', 'person',  'face')
 

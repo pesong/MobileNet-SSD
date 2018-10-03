@@ -20,6 +20,9 @@ except:
 weights = 'pretrained/mobilenet_iter_73000.caffemodel'
 proto = 'pretrained/MobileNetSSD_train.prototxt'
 
+# weights = 'snapshot/ssd/_iter_55000.caffemodel'
+# proto = 'proto/ssd/MobileNetSSD_train.prototxt'
+
 final_model_name = 'mobilenet_ssd'
 n_steps = 20000
 
