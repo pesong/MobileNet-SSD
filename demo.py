@@ -8,7 +8,7 @@ mobile_type = "union"
 
 net_file= 'proto/{}/MobileNetSSD_deploy.prototxt'.format(mobile_type)
 caffe_model='proto/{}/MobileNetSSD_deploy.caffemodel'.format(mobile_type)
-test_dir = "images"
+test_dir = "images/union"
 
 if not os.path.exists(caffe_model):
     print("MobileNetSSD_deploy.caffemodel does not exist,")
@@ -17,8 +17,7 @@ if not os.path.exists(caffe_model):
 net = caffe.Net(net_file, caffe_model, caffe.TEST)
 
 CLASSES = ('background',
-           'person', 'bicycle', 'car', 'road',
-           'rider', 'bus', 'motorcycle', 'truck')
+           'person', 'car')
 #
 # CLASSES = ('background', 'person',  'face')
 

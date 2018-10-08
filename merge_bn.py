@@ -6,7 +6,7 @@ import caffe
 mobile_type = "union"
 # mobile_type = "seg"
 
-iter_num = 128
+iter_num = 4000
 
 train_proto = 'proto/{}/MobileNetSSD_train.prototxt'.format(mobile_type)
 
