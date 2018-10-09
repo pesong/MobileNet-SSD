@@ -78,6 +78,7 @@ for img_path in os.listdir(img_path_root):
     # 对原始照片融合mask像素信息
     img_masked_array = vis.vis_seg(img_ori, out_seg, voc_palette)
     img_masked = Image.fromarray(img_masked_array)
+
     # img_masked.save('demo_test/visualization.jpg')
 
     for i in range(len(box)):
@@ -87,11 +88,14 @@ for img_path in os.listdir(img_path_root):
         p3 = (max(p1[0], 15), max(p1[1], 15))
         title = "%s:%.2f" % (CLASSES[int(cls[i])], conf[i])
         cv2.putText(img_masked_array, title, p3, cv2.FONT_ITALIC, 0.6, (0, 255, 0), 1)
+
+    img_masked_array = img_masked_array[:, :, ::-1]
     cv2.imshow("SSD", img_masked_array)
-    k = cv2.waitKey(1)
+    # k = cv2.waitKey(1)
+
     # # Exit if ESC pressed
-    # k = cv2.waitKey(0) & 0xff
-    # if k == 27: break
+    k = cv2.waitKey(0) & 0xff
+    if k == 27: break
 
     # 统计推理速度
     processed_img_num += 1
