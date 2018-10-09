@@ -98,7 +98,7 @@ for IMAGE_PATH in os.listdir(IMAGE_PATH_ROOT):
 
     # Get the results from NCS
     out, userobj = fifo_out.read_elem()
-    total_out = out['total_out'].reshape([1, -1])[0]
+    total_out = out.reshape([1, -1])[0]
 
     # out_ssd
     out_ssd = total_out[H * W * CLS:].reshape([1, 1, -1, 7])
