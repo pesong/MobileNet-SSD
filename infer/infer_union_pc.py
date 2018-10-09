@@ -40,10 +40,10 @@ def preprocess(src):
 def postprocess(img, out):
     h = img.shape[0]
     w = img.shape[1]
-    box = out['detection_out'][0, 0, :, 3:7] * np.array([w, h, w, h])
+    box = out[0, 0, :, 3:7] * np.array([w, h, w, h])
 
-    cls = out['detection_out'][0, 0, :, 1]
-    conf = out['detection_out'][0, 0, :, 2]
+    cls = out[0, 0, :, 1]
+    conf = out[0, 0, :, 2]
     return (box.astype(np.int32), conf, cls)
 
 
@@ -62,12 +62,12 @@ for img_path in os.listdir(img_path_root):
 
     # ------------------infer-----------------------------
     # run net and take argmax for prediction
-    out_ssd = net.forward()
+    out = net.forward()
+    out_ssd = out['detection_out']
     box, conf, cls = postprocess(img_ori, out_ssd)
 
-    out_seg = net.blobs['upscore'].data[0]
-    out_seg = out_seg.argmax(axis=0)
-    out_seg = out_seg[0:-11, 0:-11]
+    out_seg = out['score']
+    out_seg = out_seg[0].argmax(axis=0)
 
     # -------------visualize segmentation------------------
     voc_palette = vis.make_palette(2)  # 2代表分割模型的类别数目
