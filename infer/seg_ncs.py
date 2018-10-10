@@ -49,7 +49,7 @@ fifo_in, fifo_out = graph.allocate_with_fifos(device, blob)
 # -------- step3: offload image into the ncs to run inference
 fig = plt.figure(figsize=(18,12))
 fig.tight_layout()
-plt.subplots_adjust(left=0.04, top= 0.96, right = 0.96, bottom = 0.04, wspace = 0.01, hspace = 0.01)  # 调整子图间距
+plt.subplots_adjust(left=0.04, top= 0.96, right = 0.96, bottom = 0.04, wspace = 0.01, hspace = 0.01)
 plt.ion()
 
 i = 0
@@ -66,7 +66,7 @@ for IMAGE_PATH in os.listdir(IMAGE_PATH_ROOT):
 
     # Mean subtraction & scaling [A common technique used to center the data]
     img = img.astype(numpy.float32)
-    image_t = (img - numpy.float32(IMAGE_MEAN)) * numpy.float32(2.0/255)
+    image_t = (img - numpy.float32(IMAGE_MEAN))
     # image_t = numpy.transpose(image_t, (2, 0, 1))
 
 # -----------step4: get result-------------------------------------------------
@@ -78,7 +78,7 @@ for IMAGE_PATH in os.listdir(IMAGE_PATH_ROOT):
     #  flatten ---> image
     out = out.reshape(-1, 2).T.reshape(2, 331, -1)
     out = out.argmax(axis=0)
-    out = out[0:-11, 0:-11]
+    out = out[6:-5, 6:-5]
 
     # save result
     voc_palette = vis.make_palette(2)
