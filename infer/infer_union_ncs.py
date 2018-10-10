@@ -1,153 +1,217 @@
 #! /usr/bin/env python3
 
-import os
-import time
-import numpy as np
-import skimage.io
-import skimage.transform
-from PIL import Image
-import mvnc.mvncapi as mvnc
-from utils import vis
+# Copyright(c) 2017 Intel Corporation.
+# License: MIT See LICENSE file in root directory.
+import numpy
 import cv2
-import matplotlib.pyplot as plt
+import sys
+sys.path.insert(0, "/media/pesong/e/dl_gaussian/model/ncappzoo/ncapi2_shim")
+import mvnc_simple_api as mvnc
+
+EXAMPLES_BASE_DIR='../'
+IMAGES_DIR = EXAMPLES_BASE_DIR + 'images/'
+IMAGE_FULL_PATH = IMAGES_DIR + '004545.jpg'
+
+# ***************************************************************
+# Labels for the classifications for the network.
+# ***************************************************************
+LABELS = ('background',
+          'aeroplane', 'bicycle', 'bird', 'boat',
+          'bottle', 'bus', 'car', 'cat', 'chair',
+          'cow', 'diningtable', 'dog', 'horse',
+          'motorbike', 'person', 'pottedplant',
+          'sheep', 'sofa', 'train', 'tvmonitor')
 
 
-# input parameters
-H = 320
-W = 480
-CLS = 2
-IMAGE_DIM = [H, W]
-IMAGE_MEAN = [127.5, 127.5, 127.5]
+# Run an inference on the passed image
+# image_to_classify is the image on which an inference will be performed
+#    upon successful return this image will be overlayed with boxes
+#    and labels identifying the found objects within the image.
+# ssd_mobilenet_graph is the Graph object from the NCAPI which will
+#    be used to peform the inference.
+def run_inference(image_to_classify, ssd_mobilenet_graph):
 
-CLASSES = ('background',
-           'person', 'car')
+    # get a resized version of the image that is the dimensions
+    # SSD Mobile net expects
+    resized_image = preprocess_image(image_to_classify)
+
+    # ***************************************************************
+    # Send the image to the NCS
+    # ***************************************************************
+    ssd_mobilenet_graph.LoadTensor(resized_image.astype(numpy.float16), None)
+
+    # ***************************************************************
+    # Get the result from the NCS
+    # ***************************************************************
+    output, userobj = ssd_mobilenet_graph.GetResult()
+
+    #   a.	First fp16 value holds the number of valid detections = num_valid.
+    #   b.	The next 6 values are unused.
+    #   c.	The next (7 * num_valid) values contain the valid detections data
+    #       Each group of 7 values will describe an object/box These 7 values in order.
+    #       The values are:
+    #         0: image_id (always 0)
+    #         1: class_id (this is an index into labels)
+    #         2: score (this is the probability for the class)
+    #         3: box left location within image as number between 0.0 and 1.0
+    #         4: box top location within image as number between 0.0 and 1.0
+    #         5: box right location within image as number between 0.0 and 1.0
+    #         6: box bottom location within image as number between 0.0 and 1.0
+
+    # number of boxes returned
+    num_valid_boxes = int(output[0])
+    print('total num boxes: ' + str(num_valid_boxes))
+
+    for box_index in range(num_valid_boxes):
+            base_index = 7+ box_index * 7
+            if (not numpy.isfinite(output[base_index]) or
+                    not numpy.isfinite(output[base_index + 1]) or
+                    not numpy.isfinite(output[base_index + 2]) or
+                    not numpy.isfinite(output[base_index + 3]) or
+                    not numpy.isfinite(output[base_index + 4]) or
+                    not numpy.isfinite(output[base_index + 5]) or
+                    not numpy.isfinite(output[base_index + 6])):
+                # boxes with non infinite (inf, nan, etc) numbers must be ignored
+                print('box at index: ' + str(box_index) + ' has nonfinite data, ignoring it')
+                continue
+
+            # clip the boxes to the image size incase network returns boxes outside of the image
+            x1 = max(0, int(output[base_index + 3] * image_to_classify.shape[0]))
+            y1 = max(0, int(output[base_index + 4] * image_to_classify.shape[1]))
+            x2 = min(image_to_classify.shape[0], int(output[base_index + 5] * image_to_classify.shape[0]))
+            y2 = min(image_to_classify.shape[1], int(output[base_index + 6] * image_to_classify.shape[1]))
+
+            x1_ = str(x1)
+            y1_ = str(y1)
+            x2_ = str(x2)
+            y2_ = str(y2)
+
+            print('box at index: ' + str(box_index) + ' : ClassID: ' + LABELS[int(output[base_index + 1])] + '  '
+                  'Confidence: ' + str(output[base_index + 2]*100) + '%  ' +
+                  'Top Left: (' + x1_ + ', ' + y1_ + ')  Bottom Right: (' + x2_ + ', ' + y2_ + ')')
+
+            # overlay boxes and labels on the original image to classify
+            overlay_on_image(image_to_classify, output[base_index:base_index + 7])
 
 
-graph_file_name = '/dl/model/MobileNet-SSD/proto/union/union.graph'
-IMAGE_PATH_ROOT = '/dl/model/MobileNet-SSD/images/CS/'
+# overlays the boxes and labels onto the display image.
+# display_image is the image on which to overlay the boxes/labels
+# object_info is a list of 7 values as returned from the network
+#     These 7 values describe the object found and they are:
+#         0: image_id (always 0 for myriad)
+#         1: class_id (this is an index into labels)
+#         2: score (this is the probability for the class)
+#         3: box left location within image as number between 0.0 and 1.0
+#         4: box top location within image as number between 0.0 and 1.0
+#         5: box right location within image as number between 0.0 and 1.0
+#         6: box bottom location within image as number between 0.0 and 1.0
+# returns None
+def overlay_on_image(display_image, object_info):
+
+    # the minimal score for a box to be shown
+    min_score_percent = 60
+
+    source_image_width = display_image.shape[1]
+    source_image_height = display_image.shape[0]
+
+    base_index = 0
+    class_id = object_info[base_index + 1]
+    percentage = int(object_info[base_index + 2] * 100)
+    if (percentage <= min_score_percent):
+        # ignore boxes less than the minimum score
+        return
+
+    label_text = LABELS[int(class_id)] + " (" + str(percentage) + "%)"
+    box_left = int(object_info[base_index + 3] * source_image_width)
+    box_top = int(object_info[base_index + 4] * source_image_height)
+    box_right = int(object_info[base_index + 5] * source_image_width)
+    box_bottom = int(object_info[base_index + 6] * source_image_height)
+
+    box_color = (255, 128, 0)  # box color
+    box_thickness = 2
+    cv2.rectangle(display_image, (box_left, box_top), (box_right, box_bottom), box_color, box_thickness)
+
+    # draw the classification label string just above and to the left of the rectangle
+    label_background_color = (125, 175, 75)
+    label_text_color = (255, 255, 255)  # white text
+
+    label_size = cv2.getTextSize(label_text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
+    label_left = box_left
+    label_top = box_top - label_size[1]
+    if (label_top < 1):
+        label_top = 1
+    label_right = label_left + label_size[0]
+    label_bottom = label_top + label_size[1]
+    cv2.rectangle(display_image, (label_left - 1, label_top - 1), (label_right + 1, label_bottom + 1),
+                  label_background_color, -1)
+
+    # label text above the box
+    cv2.putText(display_image, label_text, (label_left, label_bottom), cv2.FONT_HERSHEY_SIMPLEX, 0.5, label_text_color, 1)
 
 
-# function used by ssd infer
+# create a preprocessed image from the source image that complies to the
+# network expectations and return it
+def preprocess_image(src):
 
-def preprocess(src):
-    img = cv2.resize(src, (W, H))
+    # scale the image
+    NETWORK_WIDTH = 480
+    NETWORK_HEIGHT = 320
+    img = cv2.resize(src, (NETWORK_WIDTH, NETWORK_HEIGHT))
+
+    # adjust values to range between -1.0 and + 1.0
     img = img - 127.5
     img = img * 0.007843
-    img = img.astype(np.float32)
-    img = img.transpose((CLS, 0, 1))
     return img
 
 
-def postprocess(img, out):
-    h = img.shape[0]
-    w = img.shape[1]
-    box = out[0, 0, :, 3:7] * np.array([w, h, w, h])
+# This function is called from the entry point to do
+# all the work of the program
+def main():
+    # name of the opencv window
+    cv_window_name = "SSD MobileNet - hit any key to exit"
 
-    cls = out[0, 0, :, 1]
-    conf = out[0, 0, :, 2]
-    return (box.astype(np.int32), conf, cls)
+    # Get a list of ALL the sticks that are plugged in
+    # we need at least one
+    devices = mvnc.EnumerateDevices()
+    if len(devices) == 0:
+        print('No devices found')
+        quit()
 
+    # Pick the first stick to run the network
+    device = mvnc.Device(devices[0])
 
-# configure the NCS
-# ***************************************************************
-mvnc.global_set_option(mvnc.GlobalOption.RW_LOG_LEVEL, 2)
+    # Open the NCS
+    device.OpenDevice()
 
-# --------step1: open the device and get a handle to it--------------------
-# look for device
-devices = mvnc.enumerate_devices()
-if len(devices) == 0:
-    print("No devices found")
-    quit()
+    # The graph file that was created with the ncsdk compiler
+    graph_file_name = '/dl/model/MobileNet-SSD/proto/union/union.graph'
 
-# Pick the first stick to run the network
-device = mvnc.Device(devices[0])
+    # read in the graph file to memory buffer
+    with open(graph_file_name, mode='rb') as f:
+        graph_in_memory = f.read()
 
-# Open the NCS
-device.open()
+    # create the NCAPI graph instance from the memory buffer containing the graph file.
+    graph = device.AllocateGraph(graph_in_memory)
 
+    # read the image to run an inference on from the disk
+    infer_image = cv2.imread(IMAGE_FULL_PATH)
 
-# ---------step2: load a graph file into hte ncs device----------------------
-# Load network graph file into memory
-with open(graph_file_name, mode='rb') as f:
-    blob = f.read()
+    # run a single inference on the image and overwrite the
+    # boxes and labels
+    run_inference(infer_image, graph)
 
-# create and allocate the graph object
-graph = mvnc.Graph('graph')
-fifo_in, fifo_out = graph.allocate_with_fifos(device, blob)
+    # display the results and wait for user to hit a key
+    cv2.imshow(cv_window_name, infer_image)
+    cv2.waitKey(0)
 
-
-i = 0
-start = time.time()
-for IMAGE_PATH in os.listdir(IMAGE_PATH_ROOT):
-
-    img_ori = skimage.io.imread(os.path.join(IMAGE_PATH_ROOT + IMAGE_PATH))
-
-    # Resize image [Image size is defined during training]
-    img = skimage.transform.resize(img_ori, IMAGE_DIM, preserve_range=True)
-
-    # Convert RGB to BGR [skimage reads image in RGB, some networks may need BGR]
-    img = img[:, :, ::-1]
-
-    # Mean subtraction & scaling [A common technique used to center the data]
-    img = img.astype(np.float32)
-    image_t = (img - np.float32(IMAGE_MEAN)) * np.float32(2.0/255)
-    # image_t = numpy.transpose(image_t, (2, 0, 1))
-
-# ----------- step3 : get result-------------------------------------------------
-    graph.queue_inference_with_fifo_elem(fifo_in, fifo_out, image_t, 'user object')
-
-    # Get the results from NCS
-    out, userobj = fifo_out.read_elem()
-    total_out = out.reshape([1, -1])[0]
-
-    # out_ssd
-    out_ssd = total_out[H * W * CLS:].reshape([1, 1, -1, 7])
-    box, conf, cls = postprocess(img_ori, out_ssd)
+    # Clean up the graph and the device
+    graph.DeallocateGraph()
+    device.CloseDevice()
 
 
-    # out_seg:  flatten ---> image
-    out_seg = total_out[0: H * W * CLS]
-    out_seg = out_seg.reshape([1, CLS, H, W])
-    out_seg = out_seg[0].argmax(axis=0)
-
-    # -------------visualize segmentation------------------
-    voc_palette = vis.make_palette(CLS)  # CLS代表分割模型的类别数目
-    out_im = Image.fromarray(vis.color_seg(out_seg, voc_palette))
-    # iamge_name = img_path.split('/')[-1].rstrip('.jpg')
-    # out_im.save('demo_test/' + iamge_name + '_pc_' + '.png')
-
-    # 对原始照片融合mask像素信息
-    img_masked_array = vis.vis_seg(img_ori, out_seg, voc_palette)
-    img_masked = Image.fromarray(img_masked_array)
-
-    # img_masked.save('demo_test/visualization.jpg')
-
-    for i in range(len(box)):
-        p1 = (box[i][0], box[i][1])
-        p2 = (box[i][2], box[i][3])
-        cv2.rectangle(img_masked_array, p1, p2, (0, 255, 0))
-        p3 = (max(p1[0], 15), max(p1[1], 15))
-        title = "%s:%.2f" % (CLASSES[int(cls[i])], conf[i])
-        cv2.putText(img_masked_array, title, p3, cv2.FONT_ITALIC, 0.6, (0, 255, 0), 1)
-
-    img_masked_array = img_masked_array[:, :, ::-1]
-    cv2.imshow("SSD", img_masked_array)
-    # k = cv2.waitKey(1)
-
-    # # Exit if ESC pressed
-    k = cv2.waitKey(0) & 0xff
-    if k == 27: break
-
-    i += 1
-    duration = time.time() - start
-    floaps = i / duration
-    print("time:{}, images_num:{}, floaps:{}".format(duration, i, floaps))
+# main entry point for program. we'll call main() to do what needs to be done.
+if __name__ == "__main__":
+    sys.exit(main())
 
 
 
-# Clean up the graph, device, and fifos
-fifo_in.destroy()
-fifo_out.destroy()
-graph.destroy()
-device.close()
-device.destroy()

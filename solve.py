@@ -23,14 +23,14 @@ proto = 'pretrained/MobileNetSSD_train.prototxt'
 # weights = 'snapshot/ssd/_iter_55000.caffemodel'
 # proto = 'proto/ssd/MobileNetSSD_train.prototxt'
 
-final_model_name = 'union'
+final_model_name = 'ssd'
 n_steps = 20000
 
 # init
 caffe.set_device(0)
 caffe.set_mode_gpu()
 
-solver = caffe.get_solver('solver_train.prototxt')
+solver = caffe.get_solver('solver_train_ssd.prototxt')
 solver.net.copy_from(weights)
 
 # surgeries

@@ -15,8 +15,8 @@ layer {
     resize_param {
       prob: 1.0
       resize_mode: WARP
-      height: 320
-      width: 480
+      height: 300
+      width: 300
       interp_mode: LINEAR
     }
   }
@@ -2419,7 +2419,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 27
+    num_output: 63
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2529,7 +2529,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 54
+    num_output: 126
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2641,7 +2641,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 54
+    num_output: 126
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2753,7 +2753,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 54
+    num_output: 126
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2865,7 +2865,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 54
+    num_output: 126
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2977,7 +2977,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 54
+    num_output: 126
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -3080,7 +3080,7 @@ layer {
     shape {
       dim: 0
       dim: -1
-      dim: 9
+      dim: 21
     }
   }
 }
@@ -3113,7 +3113,7 @@ layer {
     phase: TEST
   }
   detection_output_param {
-    num_classes: 9
+    num_classes: 21
     share_location: true
     background_label_id: 0
     nms_param {
@@ -3135,7 +3135,7 @@ layer {
     phase: TEST
   }
   detection_evaluate_param {
-    num_classes: 9
+    num_classes: 21
     background_label_id: 0
     overlap_threshold: 0.5
     evaluate_difficult_gt: false

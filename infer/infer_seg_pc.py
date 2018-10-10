@@ -19,8 +19,8 @@ IMAGE_PATH_root = '/dl/model/MobileNet-SSD/images/CS'
 IMAGE_MEAN = [127.5, 127.5, 127.5]
 IMAGE_DIM = [320, 480]
 
-NET_PROTO = "/dl/model/MobileNet-SSD/proto/union/MobileNetSSD_deploy.prototxt"
-WEIGHTS = '/dl/model/MobileNet-SSD/proto/union/MobileNetSSD_deploy.caffemodel'
+NET_PROTO = "/dl/model/MobileNet-SSD/proto/seg/MobileNetSSD_deploy.prototxt"
+WEIGHTS = '/dl/model/MobileNet-SSD/proto/seg/MobileNetSSD_deploy.caffemodel'
 
 
 # load net
@@ -89,7 +89,7 @@ for IMAGE_PATH in os.listdir(IMAGE_PATH_root):
 
 
     # draw picture
-    plt.suptitle('MobilenetV2-CPU', fontsize=16)
+    plt.suptitle('MobilenetV1-CPU', fontsize=16)
 
     plt.subplot(1, 2, 1)
     plt.title("orig image", fontsize=16)
