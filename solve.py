@@ -23,14 +23,14 @@ proto = 'pretrained/MobileNetSSD_train.prototxt'
 # weights = 'snapshot/ssd/_iter_55000.caffemodel'
 # proto = 'proto/ssd/MobileNetSSD_train.prototxt'
 
-final_model_name = 'ssd'
+final_model_name = 'seg'
 n_steps = 20000
 
 # init
 caffe.set_device(0)
 caffe.set_mode_gpu()
 
-solver = caffe.get_solver('solver_train_ssd.prototxt')
+solver = caffe.get_solver('seg_solver_train.prototxt')
 solver.net.copy_from(weights)
 
 # surgeries
@@ -42,5 +42,5 @@ val = np.loadtxt('/dl/data/cityscapes/cityscapes_ncs/val_test.txt', dtype=str)
 
 
 for _ in range(25):
-    solver.step(4000)
+    solver.step(400)
     score.seg_tests(solver, False, val, layer='score')

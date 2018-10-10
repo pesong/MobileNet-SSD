@@ -46,8 +46,8 @@ class CityScapeSegDataLayer(caffe.Layer):
         self.cropsize = params['crop_size']
 
         # two tops: data and label
-        if len(top) != 3:
-            raise Exception("Need to define three tops: data and label.")
+        if len(top) != 2:
+            raise Exception("Need to define two tops: data and label.")
         # data layers have no bottoms
         if len(bottom) != 0:
             raise Exception("Do not define a bottom.")
@@ -87,8 +87,6 @@ class CityScapeSegDataLayer(caffe.Layer):
 
         top[0].reshape(self.batch_size, 3, self.cropsize[0], self.cropsize[1])
         top[1].reshape(self.batch_size, 1, self.cropsize[0], self.cropsize[1])
-        top[2].reshape(self.batch_size, 1, self.cropsize[0], self.cropsize[1])
-
 
 
 
@@ -111,7 +109,6 @@ class CityScapeSegDataLayer(caffe.Layer):
 
             top[0].data[itt, ...] = self.data
             top[1].data[itt, ...] = self.label
-            top[2].data[itt, ...] = self.label
 
 
     def backward(self, top, propagate_down, bottom):

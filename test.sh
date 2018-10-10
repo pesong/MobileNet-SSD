@@ -4,6 +4,6 @@ latest=$(ls -t snapshot/ssd/*.caffemodel | head -n 1)
 if test -z $latest; then
 	exit 1
 fi
-/home/pesong/tools/ssd-caffe/build/tools/caffe train -solver="solver_test_ssd.prototxt" \
+/home/pesong/tools/ssd-caffe/build/tools/caffe train -solver="ssd_solver_test.prototxt" \
 --weights=$latest \
 -gpu 0

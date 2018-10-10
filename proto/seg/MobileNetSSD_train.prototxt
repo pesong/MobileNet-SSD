@@ -3,8 +3,7 @@ layer {
   name: "data"
   type: "Python"
   top: "data"
-  top: "label0"
-  top: "label"
+  top: "label_seg"
   python_param {
     module: "data_layers"
     layer: "CityScapeSegDataLayer"
@@ -3244,51 +3243,13 @@ layer {
   }
 }
 layer {
-  name: "loss"
+  name: "seg_loss"
   type: "SoftmaxWithLoss"
   bottom: "score"
-  bottom: "label"
-  top: "loss"
+  bottom: "label_seg"
+  top: "seg_loss"
   loss_param {
     ignore_label: 255
     normalize: false
-  }
-}
-
-
-layer {
-  name: "mbox_loss"
-  type: "MultiBoxLoss"
-  bottom: "mbox_loc"
-  bottom: "mbox_conf"
-  bottom: "mbox_priorbox"
-  bottom: "label"
-  top: "mbox_loss"
-  include {
-    phase: TRAIN
-  }
-  propagate_down: true
-  propagate_down: true
-  propagate_down: false
-  propagate_down: false
-  loss_param {
-    normalization: VALID
-  }
-  multibox_loss_param {
-    loc_loss_type: SMOOTH_L1
-    conf_loss_type: SOFTMAX
-    loc_weight: 1.0
-    num_classes: 3
-    share_location: true
-    match_type: PER_PREDICTION
-    overlap_threshold: 0.5
-    use_prior_for_matching: true
-    background_label_id: 0
-    use_difficult_gt: true
-    neg_pos_ratio: 3.0
-    neg_overlap: 0.5
-    code_type: CENTER_SIZE
-    ignore_cross_boundary_bbox: false
-    mining_type: MAX_NEGATIVE
   }
 }

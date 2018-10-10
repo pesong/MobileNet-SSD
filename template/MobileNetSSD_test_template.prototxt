@@ -15,13 +15,13 @@ layer {
     resize_param {
       prob: 1.0
       resize_mode: WARP
-      height: 320
-      width: 480
+      height: 300
+      width: 300
       interp_mode: LINEAR
     }
   }
   data_param {
-    source: "test_lmdb"
+    source: "lmdb/test_lmdb"
     batch_size: 1
     backend: LMDB
   }
