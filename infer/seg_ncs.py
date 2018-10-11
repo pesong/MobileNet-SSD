@@ -2,6 +2,7 @@
 
 import os
 import time
+
 import numpy
 import skimage.io
 import skimage.transform
@@ -14,7 +15,7 @@ import matplotlib.pyplot as plt
 # input parameters
 IMAGE_MEAN = [127.5, 127.5, 127.5]
 
-graph_file_name = '/dl/model/MobileNet-SSD/proto/seg/MobileNetSSD_deploy.graph'
+graph_file_name = '/dl/model/MobileNet-SSD/proto/seg/MobileNetSSD_deploy_crop.graph'
 IMAGE_PATH_ROOT = '/dl/model/MobileNet-SSD/images/CS/'
 IMAGE_DIM = [320, 480]
 
@@ -66,7 +67,7 @@ for IMAGE_PATH in os.listdir(IMAGE_PATH_ROOT):
 
     # Mean subtraction & scaling [A common technique used to center the data]
     img = img.astype(numpy.float32)
-    image_t = (img - numpy.float32(IMAGE_MEAN))
+    image_t = (img - numpy.float32(IMAGE_MEAN)) * 0.007843
     # image_t = numpy.transpose(image_t, (2, 0, 1))
 
 # -----------step4: get result-------------------------------------------------
@@ -76,9 +77,9 @@ for IMAGE_PATH in os.listdir(IMAGE_PATH_ROOT):
     out, userobj = fifo_out.read_elem()
 
     #  flatten ---> image
-    out = out.reshape(-1, 2).T.reshape(2, 331, -1)
+    out = out.reshape(-1, 2).T.reshape(2, 320, -1)
     out = out.argmax(axis=0)
-    out = out[6:-5, 6:-5]
+    # out = out[6:-5, 6:-5]
 
     # save result
     voc_palette = vis.make_palette(2)

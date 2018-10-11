@@ -1064,7 +1064,31 @@ layer {
   }
 }
 
+layer {
+  name: "score"
+  type: "Crop"
+  bottom: "upscore"
+  bottom: "data"
+  top: "score"
+  crop_param {
+    axis: 2
+    offset: 0
+  }
+}
 
-
+layer {
+   name: "total_out"
+   type: "Reshape"
+   bottom: "score"
+   top: "total_out"
+   reshape_param {
+      shape {
+        dim: 1
+        dim: 2
+        dim: 320
+        dim: 480
+      }
+    }
+}
 
 

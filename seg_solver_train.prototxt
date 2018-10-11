@@ -10,7 +10,7 @@ lr_policy: "multistep"
 gamma: 0.5
 weight_decay: 0.00005
 
-snapshot: 100
+snapshot: 200
 snapshot_prefix: "snapshot/seg/"
 solver_mode: GPU
 debug_info: false
