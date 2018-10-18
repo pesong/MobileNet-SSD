@@ -3081,6 +3081,7 @@ layer {
   bottom: "mbox_priorbox"
   bottom: "label"
   top: "mbox_loss"
+  loss_weight: 1
   include {
     phase: TRAIN
   }
@@ -3303,8 +3304,9 @@ layer {
   bottom: "score"
   bottom: "label_seg"
   top: "seg_loss"
+  loss_weight: 10
   loss_param {
     ignore_label: 255
-    normalize: false
+    normalize: true
   }
 }

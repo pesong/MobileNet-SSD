@@ -17,11 +17,11 @@ except:
 
 
 # train from fine tune
-weights = 'pretrained/mobilenet_iter_73000.caffemodel'
-proto = 'pretrained/MobileNetSSD_train.prototxt'
+# weights = 'pretrained/mobilenet_iter_73000.caffemodel'
+# proto = 'pretrained/MobileNetSSD_train.prototxt'
 
-# weights = 'snapshot/ssd/_iter_55000.caffemodel'
-# proto = 'proto/ssd/MobileNetSSD_train.prototxt'
+weights = 'snapshot/seg/_iter_14000.caffemodel'
+proto = 'proto/seg/MobileNetSSD_train.prototxt'
 
 final_model_name = 'seg'
 n_steps = 20000
@@ -42,5 +42,5 @@ val = np.loadtxt('/dl/data/cityscapes/cityscapes_ncs/val_test.txt', dtype=str)
 
 
 for _ in range(25):
-    solver.step(1000)
+    solver.step(4000)
     score.seg_tests(solver, False, val, layer='score')

@@ -4,13 +4,13 @@ test_iter: 673
 test_interval: 99999999
 
 base_lr: 0.0005
-display: 20
+display: 100
 max_iter: 120000
 lr_policy: "multistep"
 gamma: 0.5
 weight_decay: 0.00005
 
-snapshot: 200
+snapshot: 500
 snapshot_prefix: "snapshot/seg/"
 solver_mode: GPU
 debug_info: false

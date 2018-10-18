@@ -9,8 +9,10 @@ sys.path.insert(0, "/media/pesong/e/dl_gaussian/model/ncappzoo/ncapi2_shim")
 import mvnc_simple_api as mvnc
 
 EXAMPLES_BASE_DIR='../'
-IMAGES_DIR = EXAMPLES_BASE_DIR + 'images/'
-IMAGE_FULL_PATH = IMAGES_DIR + '004545.jpg'
+IMAGES_DIR = EXAMPLES_BASE_DIR + 'images/union/'
+IMAGE_FULL_PATH = IMAGES_DIR + 'berlin_000006_000019_leftImg8bit.png'
+W = 300
+H = 300
 
 # ***************************************************************
 # Labels for the classifications for the network.
@@ -154,8 +156,8 @@ def overlay_on_image(display_image, object_info):
 def preprocess_image(src):
 
     # scale the image
-    NETWORK_WIDTH = 480
-    NETWORK_HEIGHT = 320
+    NETWORK_WIDTH = W
+    NETWORK_HEIGHT = H
     img = cv2.resize(src, (NETWORK_WIDTH, NETWORK_HEIGHT))
 
     # adjust values to range between -1.0 and + 1.0
@@ -184,7 +186,7 @@ def main():
     device.OpenDevice()
 
     # The graph file that was created with the ncsdk compiler
-    graph_file_name = '/dl/model/MobileNet-SSD/proto/union/union.graph'
+    graph_file_name = '/dl/model/MobileNet-SSD/proto/ssd/MobileNetSSD_deploy.graph'
 
     # read in the graph file to memory buffer
     with open(graph_file_name, mode='rb') as f:
@@ -212,6 +214,3 @@ def main():
 # main entry point for program. we'll call main() to do what needs to be done.
 if __name__ == "__main__":
     sys.exit(main())
-
-
-

@@ -3250,6 +3250,6 @@ layer {
   top: "seg_loss"
   loss_param {
     ignore_label: 255
-    normalize: false
+    normalize: true
   }
 }
