@@ -11,8 +11,8 @@ import mvnc_simple_api as mvnc
 EXAMPLES_BASE_DIR='../'
 IMAGES_DIR = EXAMPLES_BASE_DIR + 'images/union/'
 IMAGE_FULL_PATH = IMAGES_DIR + 'berlin_000006_000019_leftImg8bit.png'
-W = 300
-H = 300
+W = 480
+H = 320
 
 # ***************************************************************
 # Labels for the classifications for the network.

@@ -6,7 +6,7 @@ layer {
   python_param {
     module: "data_layers"
     layer: "CityScapeSegDataLayer"
-    param_str: "{\'cityscape_dir\': \'/dl/data/cityscapes/cityscapes_ncs', \'batch_size\': 1, \'crop_size\': (320,480), \'seed\': 1337, \'split\': \'val\', \'mean\': (127.5, 127.5, 127.5)}"
+    param_str: "{\'cityscape_dir\': \'/dl/data/backbone_seg_ssd/bdd100k_ssd_seg/4seg', \'batch_size\': 1, \'crop_size\': (320,480), \'seed\': 1337, \'split\': \'val\', \'mean\': (127.5, 127.5, 127.5)}"
    }
 }
 
@@ -2399,7 +2399,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 63
+    num_output: 18
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2509,7 +2509,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 36
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2621,7 +2621,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 36
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2733,7 +2733,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 36
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2845,7 +2845,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 36
     kernel_size: 1
     weight_filler {
       type: "msra"
@@ -2957,7 +2957,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 126
+    num_output: 36
     kernel_size: 1
     weight_filler {
       type: "msra"

@@ -16,21 +16,20 @@ caffe.set_device(0)
 caffe.set_mode_gpu()
 
 # define parameters
-img_path_root = '/dl/model/MobileNet-SSD/images/CS'
+img_path_root = '/dl/model/MobileNet-SSD/images/bdd_100k_test'
 
 IMAGE_MEAN = [127.5, 127.5, 127.5]
-IMAGE_DIM = [320, 480]
+IMAGE_DIM = (480, 320)
 
 NET_PROTO = "/dl/model/MobileNet-SSD/proto/union/MobileNetSSD_deploy.prototxt"
-WEIGHTS = '/dl/model/MobileNet-SSD/proto/union/MobileNetSSD_deploy.caffemodel'
+WEIGHTS = '/dl/model/MobileNet-SSD/proto/ssd/MobileNetSSD_deploy.caffemodel'
 
-CLASSES = ('background',
-           'person', 'car')
+CLASSES = ('background', 'person',  'car', 'bike', 'bus', 'rider')
 
 
 def preprocess(src):
-    img = cv2.resize(src, (480, 320))
-    img = img - 127.5
+
+    img = src - 127.5
     img = img * 0.007843
     img = img.astype(np.float32)
     img = img.transpose((2, 0, 1))
@@ -55,7 +54,11 @@ start = time.time()
 for img_path in os.listdir(img_path_root):
 
     img_ori = cv2.imread(os.path.join(img_path_root, img_path))
-    img_pre = preprocess(img_ori)
+    b, g, r = cv2.split(img_ori)
+    img_ori = cv2.merge([r, g, b])
+
+    img_resize = cv2.resize(img_ori, IMAGE_DIM)
+    img_pre = preprocess(img_resize)
 
     # # copy the image data into the memory allocated for the net
     net.blobs['data'].data[...] = img_pre
@@ -64,7 +67,7 @@ for img_path in os.listdir(img_path_root):
     # run net and take argmax for prediction
     out = net.forward()
     out_ssd = out['detection_out']
-    box, conf, cls = postprocess(img_ori, out_ssd)
+    box, conf, cls = postprocess(img_resize, out_ssd)
 
     out_seg = out['score']
     out_seg = out_seg[0].argmax(axis=0)
@@ -76,7 +79,7 @@ for img_path in os.listdir(img_path_root):
     # out_im.save('demo_test/' + iamge_name + '_pc_' + '.png')
 
     # 对原始照片融合mask像素信息
-    img_masked_array = vis.vis_seg(img_ori, out_seg, voc_palette)
+    img_masked_array = vis.vis_seg(img_resize, out_seg, voc_palette)
     img_masked = Image.fromarray(img_masked_array)
 
     # img_masked.save('demo_test/visualization.jpg')
@@ -90,7 +93,10 @@ for img_path in os.listdir(img_path_root):
         cv2.putText(img_masked_array, title, p3, cv2.FONT_ITALIC, 0.6, (0, 255, 0), 1)
 
     img_masked_array = img_masked_array[:, :, ::-1]
-    cv2.imshow("SSD", img_masked_array)
+
+    cv2.namedWindow("union", 0)
+    cv2.resizeWindow("union", 600, 400)
+    cv2.imshow("union", img_masked_array)
     # k = cv2.waitKey(1)
 
     # # Exit if ESC pressed

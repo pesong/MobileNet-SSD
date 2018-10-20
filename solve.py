@@ -17,11 +17,11 @@ except:
 
 
 # train from fine tune
-# weights = 'pretrained/mobilenet_iter_73000.caffemodel'
-# proto = 'pretrained/MobileNetSSD_train.prototxt'
+weights = 'pretrained/mobilenet_iter_73000.caffemodel'
+proto = 'pretrained/MobileNetSSD_train.prototxt'
 
-weights = 'snapshot/seg/_iter_14000.caffemodel'
-proto = 'proto/seg/MobileNetSSD_train.prototxt'
+# weights = 'snapshot/seg/_iter_14000.caffemodel'
+# proto = 'proto/seg/MobileNetSSD_train.prototxt'
 
 final_model_name = 'seg'
 n_steps = 20000

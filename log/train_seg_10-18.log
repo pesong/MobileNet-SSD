@@ -1,0 +1,9 @@
+I1020 04:06:31.949200 15262 sgd_solver.cpp:138] Iteration 99900, lr = 0.000125
+I1020 04:06:50.391074 15262 solver.cpp:596] Snapshotting to binary proto file snapshot/seg/_iter_100000.caffemodel
+I1020 04:06:51.192337 15262 sgd_solver.cpp:307] Snapshotting solver state to binary proto file snapshot/seg/_iter_100000.solverstate
+>>> 2018-10-20 04:06:51.407004 Begin seg tests
+>>> 2018-10-20 04:07:43.667979 Iteration 100000 loss 0.23079507844522595
+>>> 2018-10-20 04:07:43.668059 Iteration 100000 overall accuracy 0.9474919661458333
+>>> 2018-10-20 04:07:43.668094 Iteration 100000 mean accuracy 0.9060543729761819
+>>> 2018-10-20 04:07:43.668218 Iteration 100000 mean IU 0.8538679287581568
+>>> 2018-10-20 04:07:43.668297 Iteration 100000 fwavacc 0.90116580854909

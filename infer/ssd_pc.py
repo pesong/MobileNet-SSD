@@ -7,12 +7,12 @@ import caffe
 
 # param
 mobile_type = "ssd"
-W = 300
-H = 300
+W = 320
+H = 480
 
 net_file = '../proto/{}/MobileNetSSD_deploy.prototxt'.format(mobile_type)
 caffe_model = '../proto/{}/MobileNetSSD_deploy.caffemodel'.format(mobile_type)
-test_dir = "../images/"
+test_dir = "../images/CS"
 
 
 
@@ -22,21 +22,20 @@ if not os.path.exists(caffe_model):
     exit()
 net = caffe.Net(net_file, caffe_model, caffe.TEST)
 
+
 # CLASSES = ('background',
-#            'person', 'car')
-CLASSES = ('background',
-          'aeroplane', 'bicycle', 'bird', 'boat',
-          'bottle', 'bus', 'car', 'cat', 'chair',
-          'cow', 'diningtable', 'dog', 'horse',
-          'motorbike', 'person', 'pottedplant',
-          'sheep', 'sofa', 'train', 'tvmonitor')
+#           'aeroplane', 'bicycle', 'bird', 'boat',
+#           'bottle', 'bus', 'car', 'cat', 'chair',
+#           'cow', 'diningtable', 'dog', 'horse',
+#           'motorbike', 'person', 'pottedplant',
+#           'sheep', 'sofa', 'train', 'tvmonitor')
 
 
-# CLASSES = ('background', 'person',  'face')
+CLASSES = ('background', 'person',  'car', 'bike', 'bus', 'rider')
 
 
 def preprocess(src):
-    img = cv2.resize(src, (W, H))
+    img = cv2.resize(src, (H, W))
     img = img - 127.5
     img = img * 0.007843
     return img

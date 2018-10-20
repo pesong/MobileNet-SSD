@@ -62,13 +62,11 @@ class CityScapeSegDataLayer(caffe.Layer):
 
         path_imgs = self.folders[0]
         for root, dirs, files in os.walk(path_imgs):
-            for dir in dirs:
-                for name in os.listdir(root + dir):
-                    if('leftImg8bit' in name):
-                        name_label = name.replace('leftImg8bit', 'gtFine_labelIds')
-                        root_label = root.replace(self.folders[0], self.folders[1])
-                        self.imglist.append(root + dir + '/' + name)
-                        self.labellist.append(root_label + dir + '/' + name_label)
+            for name in os.listdir(root):
+                name_label = name.replace('.jpg', '_train_id.png')
+                root_label = root.replace(self.folders[0], self.folders[1])
+                self.imglist.append(root + name)
+                self.labellist.append(root_label + name_label)
 
         # get list of image indexes.
         self.idx = 0  # current image
@@ -124,6 +122,7 @@ class CityScapeSegDataLayer(caffe.Layer):
         - transpose to channel x height x width order
         """
         im = Image.open(self.imglist[self.idx])
+        im = im.resize((self.cropsize[1], self.cropsize[0]), Image.ANTIALIAS)
         in_ = np.array(im, dtype=np.float32)
         in_ = in_[:, :, ::-1]
         in_ -= self.mean
@@ -140,11 +139,12 @@ class CityScapeSegDataLayer(caffe.Layer):
 
         # cityscapes  读取灰度图，对多分类进行相应的映射
         label = Image.open(self.labellist[self.idx])
+        label = label.resize((self.cropsize[1], self.cropsize[0]), Image.ANTIALIAS)
         label = np.array(label, dtype=np.uint8)
         label = label[np.newaxis, ...]
 
-        label_road = np.all(label == [7], axis=0)
-        label_bg = np.any(label != [7], axis=0)
+        label_road = np.all(label == [0], axis=0)
+        label_bg = np.any(label != [0], axis=0)
 
         label_all = np.dstack([label_bg, label_road])
         label_all = label_all.astype(np.float32)
