@@ -3,7 +3,7 @@ test_net: "proto/union/MobileNetSSD_test.prototxt"
 test_iter: 673
 test_interval: 10000
 
-base_lr: 0.0005
+base_lr: 0.001
 display: 100
 max_iter: 0
 lr_policy: "multistep"

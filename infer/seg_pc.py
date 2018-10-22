@@ -15,7 +15,7 @@ caffe.set_device(0)
 caffe.set_mode_gpu()
 
 # define parameters
-img_path_root = '/dl/model/MobileNet-SSD/images/bdd_100k_test'
+img_path_root = '/dl/model/MobileNet-SSD/images/kitti'
 
 IMAGE_MEAN = [127.5, 127.5, 127.5]
 IMAGE_DIM = (480, 320)

@@ -3081,7 +3081,7 @@ layer {
   bottom: "mbox_priorbox"
   bottom: "label"
   top: "mbox_loss"
-  loss_weight: 1
+  loss_weight: 0.001
   include {
     phase: TRAIN
   }

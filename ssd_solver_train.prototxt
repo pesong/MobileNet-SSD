@@ -4,7 +4,7 @@ test_iter: 673
 test_interval: 99999999
 
 base_lr: 0.0005
-display: 20
+display: 100
 max_iter: 120000
 lr_policy: "multistep"
 gamma: 0.5

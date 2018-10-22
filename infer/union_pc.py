@@ -16,13 +16,13 @@ caffe.set_device(0)
 caffe.set_mode_gpu()
 
 # define parameters
-img_path_root = '/dl/model/MobileNet-SSD/images/bdd_100k_test'
+img_path_root = '/dl/model/MobileNet-SSD/images/kitti'
 
 IMAGE_MEAN = [127.5, 127.5, 127.5]
 IMAGE_DIM = (480, 320)
 
 NET_PROTO = "/dl/model/MobileNet-SSD/proto/union/MobileNetSSD_deploy.prototxt"
-WEIGHTS = '/dl/model/MobileNet-SSD/proto/ssd/MobileNetSSD_deploy.caffemodel'
+WEIGHTS = '/dl/model/MobileNet-SSD/proto/union/MobileNetSSD_deploy.caffemodel'
 
 CLASSES = ('background', 'person',  'car', 'bike', 'bus', 'rider')
 
