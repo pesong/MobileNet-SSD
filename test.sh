@@ -1,6 +1,6 @@
 #!/bin/sh
 #latest=snapshot/mobilenet_iter_73000.caffemodel
-latest=$(ls -t snapshot/ssd/*.caffemodel | head -n 1)
+latest=$(ls -t snapshot/union/cp/*.caffemodel | head -n 1)
 if test -z $latest; then
 	exit 1
 fi
