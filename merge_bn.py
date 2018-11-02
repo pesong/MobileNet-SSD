@@ -6,12 +6,12 @@ import caffe
 
 # mobile_type = "ssd"
 mobile_type = "union"
-iter_num = 20000
+iter_num = 1500
 
 train_proto = 'proto/{}/MobileNetSSD_train.prototxt'.format(mobile_type)
 
 # should be your snapshot caffemod el
-train_model = 'snapshot/{}/cp/_iter_{}.caffemodel'.format(mobile_type, iter_num)
+train_model = 'snapshot/{}/cs/_iter_{}.caffemodel'.format(mobile_type, iter_num)
 
 deploy_proto = 'proto/{}/MobileNetSSD_deploy.prototxt'.format(mobile_type)
 save_model = 'proto/{}/MobileNetSSD_deploy.caffemodel'.format(mobile_type)

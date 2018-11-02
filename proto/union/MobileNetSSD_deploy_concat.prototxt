@@ -888,195 +888,6 @@ layer {
   bottom: "conv13"
   top: "conv13"
 }
-
-
-layer {
-  name: "score_32"
-  type: "Convolution"
-  bottom: "conv13"
-  top: "score_32"
-  param {
-    lr_mult: 1
-    decay_mult: 1
-  }
-  param {
-    lr_mult: 2
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 2
-    kernel_size: 1
-  }
-}
-
-
-layer {
-  name: "upscore_16"
-  type: "Deconvolution"
-  bottom: "score_32"
-  top: "upscore_16"
-  param {
-    lr_mult: 0
-  }
-  convolution_param {
-    num_output: 2
-    bias_term: false
-    kernel_size: 4
-    stride: 2
-    pad: 1
-  }
-}
-layer {
-  name: "score_16"
-  type: "Convolution"
-  bottom: "conv11"
-  top: "score_16"
-  param {
-    lr_mult: 1
-    decay_mult: 1
-  }
-  param {
-    lr_mult: 2
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 2
-    kernel_size: 1
-  }
-}
-layer {
-  name: "fuse_16"
-  type: "Eltwise"
-  bottom: "upscore_16"
-  bottom: "score_16"
-  top: "fuse_16"
-  eltwise_param {
-    operation: SUM
-  }
-}
-
-
-layer {
-  name: "upscore_8"
-  type: "Deconvolution"
-  bottom: "fuse_16"
-  top: "upscore_8"
-  param {
-    lr_mult: 0
-  }
-  convolution_param {
-    num_output: 2
-    bias_term: false
-    kernel_size: 4
-    stride: 2
-    pad: 1
-  }
-}
-layer {
-  name: "score_8"
-  type: "Convolution"
-  bottom: "conv5"
-  top: "score_8"
-  param {
-    lr_mult: 1
-    decay_mult: 1
-  }
-  param {
-    lr_mult: 2
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 2
-    kernel_size: 1
-  }
-}
-
-layer {
-  name: "fuse_8"
-  type: "Eltwise"
-  bottom: "upscore_8"
-  bottom: "score_8"
-  top: "fuse_8"
-  eltwise_param {
-    operation: SUM
-  }
-}
-layer {
-  name: "upscore_4"
-  type: "Deconvolution"
-  bottom: "fuse_8"
-  top: "upscore_4"
-  param {
-    lr_mult: 0
-  }
-  convolution_param {
-    num_output: 2
-    bias_term: false
-    kernel_size: 4
-    stride: 2
-    pad: 1
-  }
-}
-
-
-layer {
-  name: "score_4"
-  type: "Convolution"
-  bottom: "conv3"
-  top: "score_4"
-  param {
-    lr_mult: 1
-    decay_mult: 1
-  }
-  param {
-    lr_mult: 2
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 2
-    kernel_size: 1
-  }
-}
-layer {
-  name: "fuse_4"
-  type: "Eltwise"
-  bottom: "upscore_4"
-  bottom: "score_4"
-  top: "fuse_4"
-  eltwise_param {
-    operation: SUM
-  }
-}
-
-layer {
-  name: "upscore"
-  type: "Deconvolution"
-  bottom: "fuse_4"
-  top: "upscore"
-  param {
-    lr_mult: 0
-  }
-  convolution_param {
-    num_output: 2
-    bias_term: false
-    kernel_size: 15
-    stride: 4
-  }
-}
-
-layer {
-  name: "score"
-  type: "Crop"
-  bottom: "upscore"
-  bottom: "data"
-  top: "score"
-  crop_param {
-    axis: 2
-    offset: 0
-  }
-}
-
-
 layer {
   name: "conv14_1"
   type: "Convolution"
@@ -2100,6 +1911,192 @@ layer {
   }
 }
 
+
+layer {
+  name: "score_32"
+  type: "Convolution"
+  bottom: "conv13"
+  top: "score_32"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    kernel_size: 1
+  }
+}
+
+
+layer {
+  name: "upscore_16"
+  type: "Deconvolution"
+  bottom: "score_32"
+  top: "upscore_16"
+  param {
+    lr_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    bias_term: false
+    kernel_size: 4
+    stride: 2
+    pad: 1
+  }
+}
+layer {
+  name: "score_16"
+  type: "Convolution"
+  bottom: "conv11"
+  top: "score_16"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    kernel_size: 1
+  }
+}
+layer {
+  name: "fuse_16"
+  type: "Eltwise"
+  bottom: "upscore_16"
+  bottom: "score_16"
+  top: "fuse_16"
+  eltwise_param {
+    operation: SUM
+  }
+}
+
+
+layer {
+  name: "upscore_8"
+  type: "Deconvolution"
+  bottom: "fuse_16"
+  top: "upscore_8"
+  param {
+    lr_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    bias_term: false
+    kernel_size: 4
+    stride: 2
+    pad: 1
+  }
+}
+layer {
+  name: "score_8"
+  type: "Convolution"
+  bottom: "conv5"
+  top: "score_8"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    kernel_size: 1
+  }
+}
+
+layer {
+  name: "fuse_8"
+  type: "Eltwise"
+  bottom: "upscore_8"
+  bottom: "score_8"
+  top: "fuse_8"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "upscore_4"
+  type: "Deconvolution"
+  bottom: "fuse_8"
+  top: "upscore_4"
+  param {
+    lr_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    bias_term: false
+    kernel_size: 4
+    stride: 2
+    pad: 1
+  }
+}
+
+
+layer {
+  name: "score_4"
+  type: "Convolution"
+  bottom: "conv3"
+  top: "score_4"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    kernel_size: 1
+  }
+}
+layer {
+  name: "fuse_4"
+  type: "Eltwise"
+  bottom: "upscore_4"
+  bottom: "score_4"
+  top: "fuse_4"
+  eltwise_param {
+    operation: SUM
+  }
+}
+
+layer {
+  name: "upscore"
+  type: "Deconvolution"
+  bottom: "fuse_4"
+  top: "upscore"
+  param {
+    lr_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    bias_term: false
+    kernel_size: 15
+    stride: 4
+  }
+}
+
+layer {
+  name: "score"
+  type: "Crop"
+  bottom: "upscore"
+  bottom: "data"
+  top: "score"
+  crop_param {
+    axis: 2
+    offset: 0
+  }
+}
 
 
 layer {

@@ -21,8 +21,8 @@ except:
 # proto = 'pretrained/MobileNetSSD_train.prototxt'
 
 # train from pretrained ssd with bdd100k
-weights = 'snapshot/union/cp/_iter_20000.caffemodel'
-proto = 'proto/union/MobileNetSSD_train.prototxt'
+weights = 'snapshot/seg/_iter_100000.caffemodel'
+proto = 'proto/seg/MobileNetSSD_train.prototxt'
 
 final_model_name = 'union'
 n_steps = 20000

@@ -1889,7 +1889,7 @@ layer {
 }
 layer {
   name: "detection_out"
-  type: "DetectionOutput"
+  type: "DetectionMultiOutput"
   bottom: "mbox_loc"
   bottom: "mbox_conf_flatten"
   bottom: "mbox_priorbox"
@@ -1902,7 +1902,7 @@ layer {
     share_location: true
     background_label_id: 0
     nms_param {
-      nms_threshold: 0.45
+      nms_threshold: 0.1
       top_k: 100
     }
     code_type: CENTER_SIZE

@@ -51,7 +51,7 @@ for img_path in os.listdir(img_path_root):
     # ------------------infer-----------------------------
     # run net and take argmax for prediction
     net.forward()
-    out_seg = net.blobs['total_out'].data[0]
+    out_seg = net.blobs['score'].data[0]
     out_seg = out_seg.argmax(axis=0)
 
     # -------------visualize segmentation------------------
