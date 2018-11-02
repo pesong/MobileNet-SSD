@@ -9,21 +9,22 @@ sys.path.insert(0, "/media/pesong/e/dl_gaussian/model/ncappzoo/ncapi2_shim")
 import mvnc_simple_api as mvnc
 
 EXAMPLES_BASE_DIR='../'
-IMAGES_DIR = EXAMPLES_BASE_DIR + 'images/union/'
-IMAGE_FULL_PATH = IMAGES_DIR + 'berlin_000006_000019_leftImg8bit.png'
+IMAGES_DIR = EXAMPLES_BASE_DIR + 'images/bdd/'
+IMAGE_FULL_PATH = IMAGES_DIR + '004545.jpg'
 W = 480
 H = 320
 
 # ***************************************************************
 # Labels for the classifications for the network.
 # ***************************************************************
-LABELS = ('background',
-          'aeroplane', 'bicycle', 'bird', 'boat',
-          'bottle', 'bus', 'car', 'cat', 'chair',
-          'cow', 'diningtable', 'dog', 'horse',
-          'motorbike', 'person', 'pottedplant',
-          'sheep', 'sofa', 'train', 'tvmonitor')
+# LABELS = ('background',
+#           'aeroplane', 'bicycle', 'bird', 'boat',
+#           'bottle', 'bus', 'car', 'cat', 'chair',
+#           'cow', 'diningtable', 'dog', 'horse',
+#           'motorbike', 'person', 'pottedplant',
+#           'sheep', 'sofa', 'train', 'tvmonitor')
 
+LABELS = ('background', 'person',  'car', 'bike', 'bus', 'rider')
 
 # Run an inference on the passed image
 # image_to_classify is the image on which an inference will be performed
