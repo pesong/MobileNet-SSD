@@ -7,7 +7,7 @@ layer {
   python_param {
     module: "data_layers"
     layer: "CityScapeSegDataLayer"
-    param_str: "{\'cityscape_dir\': \'/dl/data/cityscapes/cityscapes_ncs', \'batch_size\': 1, \'crop_size\': (320,480), \'seed\': 1337, \'split\': \'train\', \'mean\': (127.5, 127.5, 127.5)}"
+    param_str: "{\'cityscape_dir\': \'/dl/data/cityscapes/cityscapes_ncs', \'batch_size\': 4, \'crop_size\': (300,300), \'seed\': 1337, \'split\': \'train\', \'mean\': (127.5, 127.5, 127.5)}"
    }
 }
 
@@ -3088,7 +3088,7 @@ layer {
   convolution_param {
     num_output: 2
     bias_term: false
-    kernel_size: 4
+    kernel_size: 3
     stride: 2
     pad: 1
   }
@@ -3179,7 +3179,7 @@ layer {
   convolution_param {
     num_output: 2
     bias_term: false
-    kernel_size: 4
+    kernel_size: 3
     stride: 2
     pad: 1
   }

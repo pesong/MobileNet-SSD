@@ -3,8 +3,8 @@ input: "data"
 input_shape {
   dim: 1
   dim: 3
-  dim: 320
-  dim: 480
+  dim: 300
+  dim: 300
 }
 layer {
   name: "conv0"
@@ -1907,7 +1907,7 @@ layer {
     share_location: true
     background_label_id: 0
     nms_param {
-      nms_threshold: 0.0001
+      nms_threshold: 0.3
       top_k: 100
     }
     code_type: CENTER_SIZE
@@ -1949,7 +1949,7 @@ layer {
   convolution_param {
     num_output: 2
     bias_term: false
-    kernel_size: 4
+    kernel_size: 3
     stride: 2
     pad: 1
   }
@@ -2040,7 +2040,7 @@ layer {
   convolution_param {
     num_output: 2
     bias_term: false
-    kernel_size: 4
+    kernel_size: 3
     stride: 2
     pad: 1
   }
@@ -2102,4 +2102,20 @@ layer {
     axis: 2
     offset: 0
   }
+}
+
+
+layer {
+   name: "seg_out"
+   type: "Reshape"
+   bottom: "score"
+   top: "seg_out"
+   reshape_param {
+      shape {
+        dim: 1
+        dim: 2
+        dim: 300
+        dim: 300
+      }
+    }
 }

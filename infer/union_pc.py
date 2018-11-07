@@ -20,7 +20,7 @@ img_path_root = '/dl/model/MobileNet-SSD/images/gs'
 # img_path_root = '/media/pesong/e/dl_gaussian/data/000/'
 
 IMAGE_MEAN = [127.5, 127.5, 127.5]
-IMAGE_DIM = (480, 320)
+IMAGE_DIM = (300, 300)
 
 NET_PROTO = "/dl/model/MobileNet-SSD/proto/union/MobileNetSSD_deploy.prototxt"
 WEIGHTS = '/dl/model/MobileNet-SSD/proto/union/MobileNetSSD_deploy.caffemodel'
@@ -70,7 +70,7 @@ for img_path in os.listdir(img_path_root):
     out_ssd = out['detection_out']
     box, conf, cls = postprocess(img_resize, out_ssd)
 
-    out_seg = out['score']
+    out_seg = out['seg_out']
     out_seg = out_seg[0].argmax(axis=0)
 
     # -------------visualize segmentation------------------

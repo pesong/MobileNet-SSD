@@ -124,6 +124,7 @@ class CityScapeSegDataLayer(caffe.Layer):
         - transpose to channel x height x width order
         """
         im = Image.open(self.imglist[self.idx])
+        im = im.resize(self.cropsize)
         in_ = np.array(im, dtype=np.float32)
         in_ = in_[:, :, ::-1]
         in_ -= self.mean
@@ -140,6 +141,7 @@ class CityScapeSegDataLayer(caffe.Layer):
 
         # cityscapes  读取灰度图，对多分类进行相应的映射
         label = Image.open(self.labellist[self.idx])
+        label = label.resize(self.cropsize)
         label = np.array(label, dtype=np.uint8)
         label = label[np.newaxis, ...]
 

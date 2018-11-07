@@ -3,8 +3,8 @@ input: "data"
 input_shape {
   dim: 1
   dim: 3
-  dim: 320
-  dim: 480
+  dim: 300
+  dim: 300
 }
 layer {
   name: "conv0"
@@ -1891,7 +1891,7 @@ layer {
   convolution_param {
     num_output: 2
     bias_term: false
-    kernel_size: 4
+    kernel_size: 3
     stride: 2
     pad: 1
   }
@@ -1982,7 +1982,7 @@ layer {
   convolution_param {
     num_output: 2
     bias_term: false
-    kernel_size: 4
+    kernel_size: 3
     stride: 2
     pad: 1
   }
@@ -2055,8 +2055,8 @@ layer {
       shape {
         dim: 1
         dim: 2
-        dim: 320
-        dim: 480
+        dim: 300
+        dim: 300
       }
     }
 }

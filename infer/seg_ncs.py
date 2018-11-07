@@ -3,21 +3,29 @@
 import os
 import time
 
-import numpy
-import skimage.io
-import skimage.transform
+import numpy as np
 from PIL import Image
 import mvnc.mvncapi as mvnc
 from utils import vis
-import matplotlib.pyplot as plt
+import cv2
 
 
 # input parameters
 IMAGE_MEAN = [127.5, 127.5, 127.5]
 
-graph_file_name = '/dl/model/MobileNet-SSD/proto/seg/MobileNetSSD_deploy_crop.graph'
+graph_file_name = '/dl/model/MobileNet-SSD/proto/seg/MobileNetSSD_deploy.graph'
 IMAGE_PATH_ROOT = '/dl/model/MobileNet-SSD/images/CS/'
-IMAGE_DIM = [320, 480]
+# IMAGE_PATH_ROOT = '/media/pesong/e/dl_gaussian/data/000/'
+
+IMAGE_DIM = (300, 300)
+
+
+def preprocess(src):
+    img = src - 127.5
+    img = img * 0.007843
+    img = img.astype(np.float32)
+    # img = img.transpose((2, 0, 1))
+    return img
 
 
 # configure the NCS
@@ -48,48 +56,48 @@ graph = mvnc.Graph('graph')
 fifo_in, fifo_out = graph.allocate_with_fifos(device, blob)
 
 # -------- step3: offload image into the ncs to run inference
-fig = plt.figure(figsize=(18,12))
-fig.tight_layout()
-plt.subplots_adjust(left=0.04, top= 0.96, right = 0.96, bottom = 0.04, wspace = 0.01, hspace = 0.01)
-plt.ion()
+
 
 i = 0
 start = time.time()
 for IMAGE_PATH in os.listdir(IMAGE_PATH_ROOT):
 
-    img_ori = skimage.io.imread(os.path.join(IMAGE_PATH_ROOT + IMAGE_PATH))
+    img_ori = cv2.imread(os.path.join(IMAGE_PATH_ROOT, IMAGE_PATH))
+    b, g, r = cv2.split(img_ori)
+    img_ori = cv2.merge([r, g, b])
 
-    # Resize image [Image size is defined during training]
-    img = skimage.transform.resize(img_ori, IMAGE_DIM, preserve_range=True)
+    img_resize = cv2.resize(img_ori, IMAGE_DIM)
+    img_in = preprocess(img_resize)
 
-    # Convert RGB to BGR [skimage reads image in RGB, some networks may need BGR]
-    img = img[:, :, ::-1]
-
-    # Mean subtraction & scaling [A common technique used to center the data]
-    img = img.astype(numpy.float32)
-    image_t = (img - numpy.float32(IMAGE_MEAN)) * 0.007843
-    # image_t = numpy.transpose(image_t, (2, 0, 1))
 
 # -----------step4: get result-------------------------------------------------
-    graph.queue_inference_with_fifo_elem(fifo_in, fifo_out, image_t, 'user object')
+    graph.queue_inference_with_fifo_elem(fifo_in, fifo_out, img_in, 'user object')
 
     # Get the results from NCS
     out, userobj = fifo_out.read_elem()
 
     #  flatten ---> image
-    out = out.reshape(-1, 2).T.reshape(2, 320, -1)
-    out = out.argmax(axis=0)
+    out = out.reshape(-1, 2).T.reshape(2, 300, -1)
+    out_seg = out.argmax(axis=0)
     # out = out[6:-5, 6:-5]
 
     # save result
-    voc_palette = vis.make_palette(2)
-    out_im = Image.fromarray(vis.color_seg(out, voc_palette))
+    voc_palette = vis.make_palette(2)  # 2代表分割模型的类别数目
+    out_im = Image.fromarray(vis.color_seg(out_seg, voc_palette))
     iamge_name = IMAGE_PATH.split('/')[-1].rstrip('.jpg')
     # out_im.save('demo_test/' + iamge_name + '_ncs_' + '.png')
 
-    # get masked image
-    img_masked = Image.fromarray(vis.vis_seg(img_ori, out, voc_palette))
-    # masked_im.save('demo_test/visualization.jpg')
+
+    # 对原始照片融合mask像素信息
+    img_masked_array = vis.vis_seg(img_resize, out_seg, voc_palette)
+    img_masked = Image.fromarray(img_masked_array)
+    img_masked_array = img_masked_array[:, :, ::-1]
+    cv2.imshow("SSD", img_masked_array)
+    # k = cv2.waitKey(1)
+
+    # # Exit if ESC pressed
+    k = cv2.waitKey(0) & 0xff
+    if k == 27: break
 
     i += 1
     duration = time.time() - start
@@ -97,22 +105,7 @@ for IMAGE_PATH in os.listdir(IMAGE_PATH_ROOT):
     print("time:{}, images_num:{}, floaps:{}".format(duration, i, floaps))
 
 
-    # draw picture
-    plt.suptitle('MobilenetV1-movidius', fontsize=16)
 
-    plt.subplot(1, 2, 1)
-    plt.title("orig image", fontsize=16)
-    plt.imshow(img_ori)
-
-    plt.subplot(1, 2, 2)
-    plt.title("segmentation", fontsize=16)
-    plt.imshow(img_masked)
-
-    plt.pause(0.000001)
-    plt.clf()
-
-plt.ioff()
-plt.show()
 
 # Clean up the graph, device, and fifos
 fifo_in.destroy()

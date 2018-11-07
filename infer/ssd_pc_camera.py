@@ -7,8 +7,8 @@ import caffe
 
 # param
 mobile_type = "ssd"
-W = 320
-H = 480
+W = 300
+H = 300
 
 net_file = '../proto/{}/MobileNetSSD_deploy.prototxt'.format(mobile_type)
 caffe_model = '../proto/{}/MobileNetSSD_deploy.caffemodel'.format(mobile_type)
@@ -44,10 +44,10 @@ def preprocess(src):
 def postprocess(img, out):
     h = img.shape[0]
     w = img.shape[1]
-    box = out['detection_out'][0, 0, :, 3:7] * np.array([w, h, w, h])
+    box = out[0, 0, :, 3:7] * np.array([w, h, w, h])
 
-    cls = out['detection_out'][0, 0, :, 1]
-    conf = out['detection_out'][0, 0, :, 2]
+    cls = out[0, 0, :, 1]
+    conf = out[0, 0, :, 2]
     return (box.astype(np.int32), conf, cls)
 
 
@@ -59,7 +59,7 @@ def detect(img_in):
     img = img.transpose((2, 0, 1))
 
     net.blobs['data'].data[...] = img
-    out = net.forward()
+    out = net.forward()['detection_out']
     box, conf, cls = postprocess(origimg, out)
 
     for i in range(len(box)):

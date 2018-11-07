@@ -2,27 +2,54 @@
 
 # Copyright(c) 2017 Intel Corporation.
 # License: MIT See LICENSE file in root directory.
+import os
+import time
+
 import numpy
 import cv2
 import sys
-sys.path.insert(0, "/media/pesong/e/dl_gaussian/model/ncappzoo/ncapi2_shim")
-import mvnc_simple_api as mvnc
+import mvnc.mvncapi as mvnc
+from utils import vis
 
-EXAMPLES_BASE_DIR='../'
-IMAGES_DIR = EXAMPLES_BASE_DIR + 'images/union/'
-IMAGE_FULL_PATH = IMAGES_DIR + 'berlin_000006_000019_leftImg8bit.png'
+IMAGE_PATH_ROOT = '/dl/model/MobileNet-SSD/images/gs/'
 W = 300
 H = 300
 
 # ***************************************************************
 # Labels for the classifications for the network.
 # ***************************************************************
-LABELS = ('background',
-          'aeroplane', 'bicycle', 'bird', 'boat',
-          'bottle', 'bus', 'car', 'cat', 'chair',
-          'cow', 'diningtable', 'dog', 'horse',
-          'motorbike', 'person', 'pottedplant',
-          'sheep', 'sofa', 'train', 'tvmonitor')
+# LABELS = ('background',
+#           'aeroplane', 'bicycle', 'bird', 'boat',
+#           'bottle', 'bus', 'car', 'cat', 'chair',
+#           'cow', 'diningtable', 'dog', 'horse',
+#           'motorbike', 'person', 'pottedplant',
+#           'sheep', 'sofa', 'train', 'tvmonitor')
+
+LABELS = ('background', 'person',  'car', 'bike', 'bus', 'rider')
+
+
+
+def run_seg_inference(input_fifo, output_fifo, input_tensor, image_to_classify, seg_mobilenet_graph):
+    seg_mobilenet_graph.queue_inference_with_fifo_elem(input_fifo, output_fifo, input_tensor, 'user object')
+
+    # Get the results from NCS
+    out, userobj = output_fifo.read_elem()
+
+    #  flatten ---> image
+    out = out.reshape(-1, 2).T.reshape(2, 300, -1)
+    out_seg = out.argmax(axis=0)
+    # out = out[6:-5, 6:-5]
+
+    # save result
+    voc_palette = vis.make_palette(2)  # 2代表分割模型的类别数目
+
+
+    # 对原始照片融合mask像素信息
+    img_masked_array = vis.vis_seg(image_to_classify, out_seg, voc_palette)
+    img_masked_array = img_masked_array[:, :, ::-1]
+    cv2.imshow("SSD", img_masked_array)
+    cv2.waitKey(1)
+    # k = cv2.waitKey(1)
 
 
 # Run an inference on the passed image
@@ -31,21 +58,14 @@ LABELS = ('background',
 #    and labels identifying the found objects within the image.
 # ssd_mobilenet_graph is the Graph object from the NCAPI which will
 #    be used to peform the inference.
-def run_inference(image_to_classify, ssd_mobilenet_graph):
+def run_ssd_inference(input_fifo, output_fifo, input_tensor, image_to_classify, ssd_mobilenet_graph):
 
-    # get a resized version of the image that is the dimensions
-    # SSD Mobile net expects
-    resized_image = preprocess_image(image_to_classify)
-
-    # ***************************************************************
-    # Send the image to the NCS
-    # ***************************************************************
-    ssd_mobilenet_graph.LoadTensor(resized_image.astype(numpy.float16), None)
+    # Write the tensor to the input_fifo and queue an inference
+    ssd_mobilenet_graph.queue_inference_with_fifo_elem(input_fifo, output_fifo, input_tensor, 'user object')
 
     # ***************************************************************
-    # Get the result from the NCS
-    # ***************************************************************
-    output, userobj = ssd_mobilenet_graph.GetResult()
+    # Get the results from the output queue
+    output, user_obj = output_fifo.read_elem()
 
     #   a.	First fp16 value holds the number of valid detections = num_valid.
     #   b.	The next 6 values are unused.
@@ -63,6 +83,7 @@ def run_inference(image_to_classify, ssd_mobilenet_graph):
     # number of boxes returned
     num_valid_boxes = int(output[0])
     print('total num boxes: ' + str(num_valid_boxes))
+
 
     for box_index in range(num_valid_boxes):
             base_index = 7+ box_index * 7
@@ -88,9 +109,9 @@ def run_inference(image_to_classify, ssd_mobilenet_graph):
             x2_ = str(x2)
             y2_ = str(y2)
 
-            print('box at index: ' + str(box_index) + ' : ClassID: ' + LABELS[int(output[base_index + 1])] + '  '
-                  'Confidence: ' + str(output[base_index + 2]*100) + '%  ' +
-                  'Top Left: (' + x1_ + ', ' + y1_ + ')  Bottom Right: (' + x2_ + ', ' + y2_ + ')')
+            # print('box at index: ' + str(box_index) + ' : ClassID: ' + LABELS[int(output[base_index + 1])] + '  '
+            #       'Confidence: ' + str(output[base_index + 2]*100) + '%  ' +
+            #       'Top Left: (' + x1_ + ', ' + y1_ + ')  Bottom Right: (' + x2_ + ', ' + y2_ + ')')
 
             # overlay boxes and labels on the original image to classify
             overlay_on_image(image_to_classify, output[base_index:base_index + 7])
@@ -148,7 +169,7 @@ def overlay_on_image(display_image, object_info):
                   label_background_color, -1)
 
     # label text above the box
-    cv2.putText(display_image, label_text, (label_left, label_bottom), cv2.FONT_HERSHEY_SIMPLEX, 0.5, label_text_color, 1)
+    cv2.putText(display_image, label_text, (label_left, label_bottom), cv2.FONT_HERSHEY_SIMPLEX, 0.3, label_text_color, 1)
 
 
 # create a preprocessed image from the source image that complies to the
@@ -158,57 +179,95 @@ def preprocess_image(src):
     # scale the image
     NETWORK_WIDTH = W
     NETWORK_HEIGHT = H
-    img = cv2.resize(src, (NETWORK_WIDTH, NETWORK_HEIGHT))
+    resized_img = cv2.resize(src, (NETWORK_WIDTH, NETWORK_HEIGHT))
+
 
     # adjust values to range between -1.0 and + 1.0
-    img = img - 127.5
-    img = img * 0.007843
-    return img
+    input_img = resized_img - 127.5
+    input_img = input_img * 0.007843
+    return resized_img, input_img
 
 
 # This function is called from the entry point to do
 # all the work of the program
 def main():
-    # name of the opencv window
-    cv_window_name = "SSD MobileNet - hit any key to exit"
 
-    # Get a list of ALL the sticks that are plugged in
-    # we need at least one
-    devices = mvnc.EnumerateDevices()
+    # look for device
+    devices = mvnc.enumerate_devices()
     if len(devices) == 0:
-        print('No devices found')
+        print("No devices found")
         quit()
 
     # Pick the first stick to run the network
     device = mvnc.Device(devices[0])
 
     # Open the NCS
-    device.OpenDevice()
+    device.open()
 
     # The graph file that was created with the ncsdk compiler
-    graph_file_name = '/dl/model/MobileNet-SSD/proto/ssd/MobileNetSSD_deploy.graph'
+    graph_file_name_ssd = '/dl/model/MobileNet-SSD/proto/ssd/MobileNetSSD_deploy.graph'
+    graph_file_name_seg = '/dl/model/MobileNet-SSD/proto/seg/MobileNetSSD_deploy.graph'
 
-    # read in the graph file to memory buffer
-    with open(graph_file_name, mode='rb') as f:
-        graph_in_memory = f.read()
+    # Load graph file data
+    with open(graph_file_name_ssd, mode='rb') as f_ssd:
+        graph_from_disk_ssd = f_ssd.read()
 
-    # create the NCAPI graph instance from the memory buffer containing the graph file.
-    graph = device.AllocateGraph(graph_in_memory)
+    with open(graph_file_name_seg, mode='rb') as f_seg:
+        graph_from_disk_seg = f_seg.read()
 
-    # read the image to run an inference on from the disk
-    infer_image = cv2.imread(IMAGE_FULL_PATH)
+    # Initialize a Graph object
+    graph_ssd = mvnc.Graph('graph_ssd')
+    graph_seg = mvnc.Graph('graph_seg')
 
-    # run a single inference on the image and overwrite the
-    # boxes and labels
-    run_inference(infer_image, graph)
 
-    # display the results and wait for user to hit a key
-    cv2.imshow(cv_window_name, infer_image)
-    cv2.waitKey(0)
+    # Allocate the graph to the device and create input and output Fifos with default arguments
+    input_fifo_ssd, output_fifo_ssd = graph_ssd.allocate_with_fifos(device, graph_from_disk_ssd)
+    input_fifo_seg, output_fifo_seg = graph_seg.allocate_with_fifos(device, graph_from_disk_seg)
 
-    # Clean up the graph and the device
-    graph.DeallocateGraph()
-    device.CloseDevice()
+    i = 0
+    start = time.time()
+
+    for IMAGE_PATH in os.listdir(IMAGE_PATH_ROOT):
+
+        # read the image to run an inference on from the disk
+        IMAGE_FULL_PATH = os.path.join(IMAGE_PATH_ROOT, IMAGE_PATH)
+        image_read = cv2.imread(IMAGE_FULL_PATH)
+        b, g, r = cv2.split(image_read)
+        image_read = cv2.merge([r, g, b])
+
+        # get a resized version of the image that is the dimensions
+        # SSD Mobile net expects
+        resized_image, input_image = preprocess_image(image_read)
+
+        # Convert an input tensor to 32FP data type
+        Image_tensor = input_image.astype(numpy.float32)
+
+        # run a single inference on the image and overwrite the
+        # boxes and labels
+        run_ssd_inference(input_fifo_ssd, output_fifo_ssd, Image_tensor, resized_image, graph_ssd)
+        # display the results and wait for user to hit a key
+        # cv2.imshow("ssd_out_image", resized_image)
+        # cv2.waitKey(0)
+
+        run_seg_inference(input_fifo_seg, output_fifo_seg, Image_tensor, resized_image, graph_seg)
+
+        i += 1
+        duration = time.time() - start
+        floaps = i / duration
+        print("time:{}, images_num:{}, floaps:{}".format(duration, i, floaps))
+
+
+    # Clean up
+    input_fifo_ssd.destroy()
+    output_fifo_ssd.destroy()
+    input_fifo_seg.destroy()
+    output_fifo_seg.destroy()
+
+    graph_ssd.destroy()
+    graph_seg.destroy()
+
+    device.close()
+    device.destroy()
 
 
 # main entry point for program. we'll call main() to do what needs to be done.

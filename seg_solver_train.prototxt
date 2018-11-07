@@ -11,7 +11,7 @@ gamma: 0.5
 weight_decay: 0.00005
 
 snapshot: 500
-snapshot_prefix: "snapshot/seg/cs/"
+snapshot_prefix: "snapshot/seg/300/"
 solver_mode: GPU
 debug_info: false
 snapshot_after_train: true

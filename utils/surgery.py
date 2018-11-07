@@ -3,7 +3,7 @@ import caffe
 import numpy as np
 
 import sys
-sys.path.append('/home/pesong/tools/caffe/python')
+sys.path.append('/home/pesong/tools/ssd-caffe/python')
 
 
 def transplant(new_net, net, suffix=''):

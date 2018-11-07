@@ -11,7 +11,7 @@ gamma: 0.5
 weight_decay: 0.00005
 
 snapshot: 0
-snapshot_prefix: "snapshot/union/cs/"
+snapshot_prefix: "snapshot/union/300/"
 solver_mode: GPU
 debug_info: false
 snapshot_after_train: false
