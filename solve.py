@@ -17,21 +17,21 @@ except:
 
 
 # train from fine tune
-# weights = 'pretrained/mobilenet_iter_73000.caffemodel'
-# proto = 'pretrained/MobileNetSSD_train.prototxt'
+weights = 'pretrained/mobilenet_iter_73000.caffemodel'
+proto = 'pretrained/MobileNetSSD_train.prototxt'
 
 # train from pretrained ssd with bdd100k
-weights = 'snapshot/seg/300/_iter_2000.caffemodel'
-proto = 'proto/seg/MobileNetSSD_train.prototxt'
+# weights = 'snapshot/seg/300/_iter_2000.caffemodel'
+# proto = 'proto/seg/MobileNetSSD_train.prototxt'
 
-final_model_name = 'union'
+final_model_name = 'seg'
 n_steps = 20000
 
 # init
 caffe.set_device(0)
 caffe.set_mode_gpu()
 
-solver = caffe.get_solver('union_solver_train.prototxt')
+solver = caffe.get_solver('seg_solver_train.prototxt')
 solver.net.copy_from(weights)
 
 # surgeries
