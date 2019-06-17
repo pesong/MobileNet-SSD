@@ -1,6 +1,9 @@
 .idea/
 snapshot/
 snapshot2/
-lmdb/
+lmdb/seg_test_lmdb
+lmdb/seg_trainval_lmdb
+lmdb/test_lmdb
+lmdb/trainval_lmdb
 __pycache__/
 images/
