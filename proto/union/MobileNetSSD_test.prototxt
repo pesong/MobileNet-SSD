@@ -23,7 +23,7 @@ layer {
   }
 
   data_param {
-    source: "lmdb/seg_test_lmdb"
+    source: "lmdb/test_lmdb"
     batch_size: 1
     backend: LMDB
   }

@@ -5,6 +5,6 @@ if ! test -f proto/ssd/MobileNetSSD_train.prototxt ;then
         exit 1
 fi
 mkdir -p snapshot/ssd
-/home/pesong/tools/ssd-caffe/build/tools/caffe train -solver="ssd_solver_train.prototxt" \
+/home/pesong/tools/ssd-caffe/build/tools/caffe train -solver="union_solver_train.prototxt" \
 -weights="pretrained/mobilenet_iter_73000.caffemodel" \
 -gpu 0 

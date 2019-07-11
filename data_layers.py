@@ -5,7 +5,9 @@ import sys
 
 import scipy
 
-sys.path.append('/opt/movidius/caffe/python')
+# sys.path.append('/home/pesong/tools/ssd-caffe/python')
+caffe_root = '/home/pesong/tools/ssd-caffe/'
+sys.path.insert(0, caffe_root + 'python') # 加载caffe的python模块
 import caffe
 
 import numpy as np
